@@ -1,0 +1,18 @@
+body {
+    background-color: aquamarine;
+}
+
+#board {
+    background-color: bisque;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+.box {
+    position: absolute;
+}
+
+.singlebox {
+
+}

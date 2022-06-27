@@ -1,0 +1,167 @@
+class Game {
+    constructor() {
+        this.time = 0;
+
+        this.movedBox = null;
+        this.boxLayer = null;
+        
+        this.boxArr =[[],[],[],[],[]]
+
+        
+        //this.boxesArray = new Array(5).fill([]);
+    }
+    start() {
+        console.log("starting game...")
+        this.boxLayer = new BoxLayer(this.boxArr);
+        this.attachEventListeners();
+        
+        setInterval(() => {
+            //console.log('interval works..')
+            this.boxLayer.addBoxesLayer();
+            console.log(this.boxLayer.boxesArray)
+            
+        },5000)
+        
+        this.movedBox = new MovedBox(); 
+        //this.movedBox.moveDown();
+    }
+
+    attachEventListeners() {
+        document.addEventListener('keydown', (event) => {
+            //console.log(event);
+            if(event.key==="ArrowLeft") {
+                console.log("you pressed arrow left");
+                this.movedBox.moveLeft();
+            }
+            else if(event.key==="ArrowRight") {
+                console.log("you pressed arrow right");
+                this.movedBox.moveRight();
+            }
+            else if(event.code === 'Space' ) {
+                //console.log(this.boxLayer.boxesArray)
+                this.movedBox.drop(this.boxLayer.boxesArray, this.movedBox.color);
+                this.movedBox = new MovedBox(); 
+            }
+        }
+        );
+    }
+
+}
+
+class Boxes {
+    constructor() {
+        this.width = 60; 
+        this.height = 20; 
+        this.boxesPerRow = 5; 
+
+        this.arrayOfColors = ['red', 'violet', 'green', 'yellow']
+
+        }
+
+    createRandomBoxColor() {
+        const random = Math.floor(Math.random() * this.arrayOfColors.length);
+        const boxcolor = this.arrayOfColors[random];
+        return boxcolor;
+    }
+
+}
+
+class MovedBox extends Boxes {
+    constructor() {
+        super();
+        this.movedBoxPositionX = this.boxesPerRow*this.width/2 - this.width/2;
+        this.movedBoxPositionY = 10*this.height;
+        this.domElement = this.createMovedBoxElement();
+        this.color = this.createRandomBoxColor();
+
+    }
+
+    createMovedBoxElement() {
+        const boxcolor = this.createRandomBoxColor();
+        const newBoxElm = document.createElement('div')
+        newBoxElm.className = "box";
+        
+        newBoxElm.style.width = this.width + "px";
+        newBoxElm.style.height = this.height + "px";
+        newBoxElm.style.backgroundColor = boxcolor;
+        newBoxElm.style.left = this.movedBoxPositionX + "px";
+        newBoxElm.style.bottom =  this.movedBoxPositionY;
+        
+        const boardElm = document.getElementById("board");
+        boardElm.appendChild(newBoxElm);
+        return newBoxElm;
+    }
+    
+
+    moveLeft(){
+        this.movedBoxPositionX-=this.width;
+        this.domElement.style.left = this.movedBoxPositionX + "px";
+    }
+
+    moveRight(){
+        this.movedBoxPositionX+=this.width;
+        this.domElement.style.left = this.movedBoxPositionX + "px";
+    }
+
+    drop(array, boxcolor){
+        console.log("droppp");
+        const place = this.movedBoxPositionX/this.width
+        this.movedBoxPositionY = (array[place].length)*this.height;
+        array[place].push(boxcolor);
+        this.domElement.style.bottom = this.movedBoxPositionY + "px";
+        return array;
+
+
+        // const boardElm = document.getElementById("board");
+        // boardElm.appendChild(newBoxElm);
+
+        
+    }
+ 
+}
+
+
+class BoxLayer extends Boxes {
+    constructor(array) {
+        super();
+        this.towerHeight = 0;
+        this.boxesArray = array;
+        //this.boxesArray = [[],[],[],[],[]]
+        //this.boxesArray = new Array(5).fill([]);
+
+    }
+
+    addBoxesLayer() {
+
+        let positionHor = 0;
+        for (let i=0; i<this.boxesArray.length ; i++) {
+        // create new layer in boxesArray
+            const boxcolor = this.createRandomBoxColor(); 
+            this.boxesArray[i].unshift(boxcolor)
+        // create new domElements
+            const newBoxElm = document.createElement('div')
+            newBoxElm.className = "box";
+    
+            newBoxElm.style.width = this.width + "px";
+            newBoxElm.style.height = this.height + "px";
+            newBoxElm.style.backgroundColor = boxcolor;
+            newBoxElm.style.left = positionHor + "px";
+            newBoxElm.style.bottom = this.towerHeight + "px";
+    
+            const boardElm = document.getElementById("board");
+            boardElm.appendChild(newBoxElm);
+            
+            positionHor+=this.width;
+            
+            
+        }
+        
+        this.towerHeight+=this.height;
+        //console.log(this.towerHeight);
+    }
+}
+
+
+const game = new Game();
+game.start();
+
