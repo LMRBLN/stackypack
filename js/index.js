@@ -28,7 +28,23 @@ class Game {
             }
             else if(event.code === 'Space' ) {
                 this.box.drop(this.boxArr);
-                this.checkArray(this.box.xIndex, this.box.yIndex);
+                let sameColor = this.checkArray(this.box.xIndex, this.box.yIndex);
+                this.remove(sameColor);
+                
+            // sameColor =[[0,1],[2,1],[3,1] ....]]
+
+                // if (sameColor.length > 2) {
+
+                //     let sameColorIter =[];
+                //     sameColor.forEach(coord => {
+                //         console.log("SAMEEEE",this.checkArray(coord[0], coord[1]));
+                //         let sameColor = this.checkArray(coord[0], coord[1]);
+                //         console.log('sameColorIter', sameColor);
+                //         sameColorIter.push(sameColor);
+                //     });
+                // }
+        
+                
                 this.box = new Box(this.xPositionStart, this.yPositionStart);
             }
         }); 
@@ -38,13 +54,11 @@ class Game {
 
 
 checkArray(x, y) {
-    console.log(x)
-    console.log(y)
-    const sameColor = [[x, y]] 
-    console.log(this.boxArr[x][y])
 
-    // check for same color in y-direction (only downwards), we have to check y-1 and y-2
+    const sameColor = [[x, y]] 
+
     if (y > 0 &&
+        this.boxArr[x][y-1] != undefined &&
         this.boxArr[x][y].boxColor == this.boxArr[x][y-1].boxColor )
         {
             sameColor.push([x, y-1]);
@@ -79,14 +93,13 @@ checkArray(x, y) {
                             
         }
     
-      
-                    
+           
 
 
     // from y, we also need to check for same color in x-direction (leftwards), it can be up to two boxes of the same color, on both sides
     if ( x > 0 && 
         this.boxArr[x-1][y] != undefined) {
-        
+        console.log("thiiiiiiiiiiiiiiis",this.boxArr[x-1][y]);
         if (this.boxArr[x][y].boxColor == this.boxArr[x-1][y].boxColor) {
             sameColor.push([x-1, y]);
             if (
@@ -118,7 +131,6 @@ checkArray(x, y) {
     if ( 
         x < this.boxArr.length-1 && 
         this.boxArr[x+1][y] != undefined   && 
-        x < this.boxArr.length && 
         this.boxArr[x][y].boxColor == this.boxArr[x+1][y].boxColor
         ) {
         sameColor.push([x+1, y]);
@@ -139,44 +151,46 @@ checkArray(x, y) {
             this.boxArr[x+1][y-1]!= undefined && 
             this.boxArr[x][y].boxColor == this.boxArr[x+1][y-1].boxColor
             ){
-            sameColor.push([x+1, y-1]);
-        }
-    }
-
-    console.log(sameColor);
-
-    if (sameColor.length > 2 ) {
-        sameColor.forEach(coord => {
-            console.log("this element is to remove: ")
-            console.log(this.boxArr[coord[0]][coord[1]].domElement);
-            this.boxArr[coord[0]][coord[1]].domElement.remove();
-
-            //we need to shift all boxes, above the ones that have been removed:
-
-            for (let i=coord[1]+1; i<this.boxArr[coord[0]].length; i++) {
-                //console.log(this.boxArr[coord[0]][i]);
-                if (this.boxArr[coord[0]][i] == undefined) {
-                    console.log("there is an undefined");
-                    continue;
-                }
-                else if (this.boxArr[coord[0]][i].yIndex >= coord[1]) {
-                    console.log("there is a box to shift");
-                    console.log(this.boxArr[coord[0]][i]);
-                    console.log(this.boxArr[coord[0]][i].yIndex);
-                    this.boxArr[coord[0]][i].shift();
-                }
+                sameColor.push([x+1, y-1]);
             }
-
-
-        })
-        sameColor.forEach(coord => {
-            this.boxArr[coord[0]].splice(coord[1], 1); 
-        })
-
+        }
+        
+        console.log(sameColor);
+        return sameColor;
     }
-    console.log(this.boxArr);
 
-}
+    remove(sameColor) {
+
+        if (sameColor.length > 2 ) {
+            sameColor.forEach(coord => {
+                // console.log("this element is to remove: ")
+                // console.log(this.boxArr[coord[0]][coord[1]].domElement);
+                this.boxArr[coord[0]][coord[1]].domElement.remove();
+    
+                //we need to shift all boxes, above the ones that have been removed:
+    
+                for (let i=coord[1]+1; i<this.boxArr[coord[0]].length; i++) {
+                    //console.log(this.boxArr[coord[0]][i]);
+                    if (this.boxArr[coord[0]][i] == undefined) {
+                        console.log("there is an undefined");
+                        continue;
+                    }
+                    else if (this.boxArr[coord[0]][i].yIndex >= coord[1]) {
+                        // console.log("there is a box to shift");
+                        // console.log(this.boxArr[coord[0]][i]);
+                        // console.log(this.boxArr[coord[0]][i].yIndex);
+                        this.boxArr[coord[0]][i].shift();
+                    }
+                }
+            })
+            sameColor.forEach(coord => {
+                this.boxArr[coord[0]].splice(coord[1], 1); 
+            })
+    
+        }
+        console.log(this.boxArr);
+    }
+
 
 
 
