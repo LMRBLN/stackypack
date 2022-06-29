@@ -42,7 +42,11 @@ class Game {
 
 
                 if (Math.max(...this.boxArr.map((e) => e.length)) < 20) {
+                    
                     this.box.drop(this.boxArr);
+
+
+
                     let positionsToClear = this.getPositionsToClear(this.box.xIndex, this.box.yIndex);
                     if (positionsToClear.length > 2 ) {
                         let dropTime = setTimeout( () => {
@@ -50,21 +54,26 @@ class Game {
                         }, 320)
                     }
                     
-                    // positionsToClear =[[0,1],[2,1],[3,1] ....]]
-                    
-                    // if (positionsToClear.length > 2) {
-                        
-                        //     let positionsToClearIter =[];
-                        //     positionsToClear.forEach(coord => {
-                            //         console.log("SAMEEEE",this.getPositionsToClear(coord[0], coord[1]));
-                            //         let positionsToClear = this.getPositionsToClear(coord[0], coord[1]);
-                            //         console.log('positionsToClearIter', positionsToClear);
-                            //         positionsToClearIter.push(positionsToClear);
-                            //     });
-                            // }
+
+                    // let positionsToClear = [this.box.xIndex,this.box.yIndex]
+                    // do {
+                    // positionsToClear.forEach( coord => {
+                    //     if (this.boxArr[coord[0]][coord[1]] != undfined)
+                    //     newPositionsToClear = this.getPositionsToClear(coord[0], coord[1]);
+                    //     positionsToClear.push(newPositionsToClear);
+                    // }
+                    // )
+                    // if (positionsToClear.length>2) {
+                    //     this.clearPositions(positionsToClear); 
+                    // }
+
+                    // } while(positionsToClear.length > 2)
+
+
+
                             
-                            this.box = new Box(this.xPositionStart, this.yPositionStart);
-                        }
+                    this.box = new Box(this.xPositionStart, this.yPositionStart);
+                }
 
 
 
@@ -248,7 +257,7 @@ class Box {
         newBoxElm.style.width = this.width + "px";
         newBoxElm.style.height = this.height + "px";
         newBoxElm.style.backgroundColor = this.boxColor;
-        newBoxElm.style.border = "0.5px solid white";
+        newBoxElm.style.border = "0.5px solid black";
         newBoxElm.style.left = this.xPosition + "px";
         newBoxElm.style.bottom =  this.yPosition + "px";
         
