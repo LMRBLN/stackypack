@@ -13,21 +13,17 @@ class Game {
     }
 
     start() {
-        console.log("starting game...")
-        
-        let growInterval = setInterval(() => {
-            this.createLayer();
+        let growInterval = setInterval(() => { // every 5 seconds, the tower grows until reaching a defined height
+            this.createLayer(); 
             if (Math.max(...this.boxArr.map((e) => e.length)) > 19) {
                 clearInterval(growInterval);
                 console.log("game over")
-                modal.style.display = "block";
+                gameOverModal.style.display = "block";
             }
-
         }, 5000)
         
-        this.box = new Box(this.xPositionStart, this.yPositionStart);
+        this.box = new Box(this.xPositionStart, this.yPositionStart); // initial box gets created, then: new box gets created as soon as box is dropped
         this.attachEventListeners();
-        
     }
 
     attachEventListeners() {
@@ -39,190 +35,140 @@ class Game {
                 this.box.moveRight();
             }
             else if(event.code === 'Space' ) {
-
-
                 if (Math.max(...this.boxArr.map((e) => e.length)) < 20) {
-                    
                     this.box.drop(this.boxArr);
-
-
-
-                    let positionsToClear = this.getPositionsToClear(this.box.xIndex, this.box.yIndex);
-                    if (positionsToClear.length > 2 ) {
-                        let dropTime = setTimeout( () => {
-                        this.clearPositions(positionsToClear);
-                        }, 320)
-                    }
-                    
-
-                    // let positionsToClear = [this.box.xIndex,this.box.yIndex]
-                    // do {
-                    // positionsToClear.forEach( coord => {
-                    //     if (this.boxArr[coord[0]][coord[1]] != undfined)
-                    //     newPositionsToClear = this.getPositionsToClear(coord[0], coord[1]);
-                    //     positionsToClear.push(newPositionsToClear);
-                    // }
-                    // )
-                    // if (positionsToClear.length>2) {
-                    //     this.clearPositions(positionsToClear); 
-                    // }
-
-                    // } while(positionsToClear.length > 2)
-
-
-
-                            
+                    let positionsToRemove = this.getpositionsToRemove([this.box.xIndex, this.box.yIndex]); // check if there are more than 3 same-color-boxes in a row
                     this.box = new Box(this.xPositionStart, this.yPositionStart);
                 }
-
-
-
+                else {
+                    console.log("game over")
+                    gameOverModal.style.display = "block";
+                }
             }
         }); 
     }
 
+    getpositionsToRemove(position) {
+        
+        const positionsToRemove = [];
+        positionsToRemove.push(position);
 
-
-
-getPositionsToClear(x, y) {
-
-    const positionsToClear = [[x, y]] 
-
-    if (y > 0 &&
-        this.boxArr[x][y-1] != undefined &&
-        this.boxArr[x][y].boxColor == this.boxArr[x][y-1].boxColor )
-        {
-            positionsToClear.push([x, y-1]);
-            
-            if (
-                y > 1 && 
-                this.boxArr[x][y-1].boxColor == this.boxArr[x][y-2].boxColor
+        function checkAdjacent(arr, coord) {
+            const adjacents = [];
+            let x = coord[0];
+            let y = coord[1];
+  
+  
+            if (arr[x][y] != undefined) {
+                if (
+                    y < arr[x].length-1 &&
+                    arr[x][y + 1] != undefined &&
+                    arr[x][y].boxColor == arr[x][y + 1].boxColor &&
+                    checkIfStoredAlready(positionsToRemove, [x, y + 1]) == false &&
+                    checkIfStoredAlready(adjacents, [x, y + 1]) == false
                 ) {
-                    positionsToClear.push([x, y-2]);
+                    console.log("all conditions are fine")
+                    adjacents.push([x, y + 1]);
                 }
+            
+            
+                if (
+                    y > 0 &&
+                    arr[x][y - 1] !== undefined &&
+                    arr[x][y].boxColor == arr[x][y - 1].boxColor &&
+                    checkIfStoredAlready(positionsToRemove, [x, y - 1]) == false &&
+                    checkIfStoredAlready(adjacents, [x, y - 1]) == false) {
+                    adjacents.push([x, y - 1]);
                     
-            // if y-1 is the same color, we need to check neighbors from here in x direction (both sides)
-            if ( 
-                x > 0 && 
-                this.boxArr[x-1][y-1] != undefined
-                ) {
-                        if (this.boxArr[x][y-1].boxColor == this.boxArr[x-1][y-1].boxColor) {
-                                positionsToClear.push([x-1, y-1]);
-                            }
                 }
             
-             if ( 
-                x < this.boxArr.length-1 && 
-                this.boxArr[x+1][y-1] != undefined
+                if (
+                    x < arr.length-1 &&
+                    arr[x + 1][y] != undefined &&
+                    arr[x][y].boxColor == arr[x + 1][y].boxColor &&
+                    checkIfStoredAlready(positionsToRemove, [x + 1, y]) == false &&
+                    checkIfStoredAlready(adjacents, [x + 1, y]) == false
                 ) {
-                            
-                        if (this.boxArr[x][y-1].boxColor == this.boxArr[x+1][y-1].boxColor) {
-                            positionsToClear.push([x+1, y-1]);
-                        }
-                }            
-        }
-    
-    // from y, we also need to check for same color in x-direction (leftwards), it can be up to two boxes of the same color, on both sides
-    if ( x > 0 && 
-        this.boxArr[x-1][y] != undefined) {
-        if (this.boxArr[x][y].boxColor == this.boxArr[x-1][y].boxColor) {
-            positionsToClear.push([x-1, y]);
-            if (
-                x > 1 && 
-                this.boxArr[x-2][y] != undefined && 
-                this.boxArr[x][y].boxColor == this.boxArr[x-2][y].boxColor
-                ) {
-                positionsToClear.push([x-2, y]);
-            } 
-            if (
-                this.boxArr[x-1][y+1] != undefined && 
-                this.boxArr[x][y].boxColor == this.boxArr[x-1][y+1].boxColor
-                ){
-                positionsToClear.push([x-1, y+1]);
-            }
-            if (
-                y > 0 && 
-                this.boxArr[x-1][y-1] != undefined && 
-                this.boxArr[x][y].boxColor == this.boxArr[x-1][y-1].boxColor
-                ){
-                positionsToClear.push([x-1, y-1]);
-            }
-
-        }
-    }
-
-    // check for same color in x-direction (rightwards)
-        
-    if ( 
-        x < this.boxArr.length-1 && 
-        this.boxArr[x+1][y] != undefined   && 
-        this.boxArr[x][y].boxColor == this.boxArr[x+1][y].boxColor
-        ) {
-        positionsToClear.push([x+1, y]);
-        if (
-            x < this.boxArr.length-2 && 
-            this.boxArr[x+2][y] != undefined  && 
-            this.boxArr[x][y].boxColor == this.boxArr[x+2][y].boxColor
-            ) {
-                positionsToClear.push([x+2, y]);
-        }
-        if (
-            this.boxArr[x+1][y+1] != undefined && 
-            this.boxArr[x][y].boxColor == this.boxArr[x+1][y+1].boxColor
-            ){
-            positionsToClear.push([x+1, y+1]);
-        }
-        if (
-            this.boxArr[x+1][y-1]!= undefined && 
-            this.boxArr[x][y].boxColor == this.boxArr[x+1][y-1].boxColor
-            ){
-                positionsToClear.push([x+1, y-1]);
-            }
-        }
-        
-        console.log(positionsToClear);
-        return positionsToClear;
-    }
-
-    clearPositions(positionsToClear) {
-
-            positionsToClear.forEach(coord => {
-                // console.log("this element is to clearPositions: ")
-                // console.log(this.boxArr[coord[0]][coord[1]].domElement);
-                this.boxArr[coord[0]][coord[1]].domElement.remove();
-    
-                //we need to shiftDown all boxes, above the ones that have been removed:
-    
-                for (let i=coord[1]+1; i<this.boxArr[coord[0]].length; i++) {
-                    //console.log(this.boxArr[coord[0]][i]);
-                    if (this.boxArr[coord[0]][i] == undefined) {
-                        console.log("there is an undefined");
-                        continue;
-                    }
-                    else if (this.boxArr[coord[0]][i].yIndex >= coord[1]) {
-                        // console.log("there is a box to shiftDown");
-                        // console.log(this.boxArr[coord[0]][i]);
-                        // console.log(this.boxArr[coord[0]][i].yIndex);
-                        this.boxArr[coord[0]][i].shiftDown();
-                    }
+                    adjacents.push([x + 1, y]);
                 }
-            })
-            positionsToClear.forEach(coord => {
-                this.boxArr[coord[0]].splice(coord[1], 1); 
-            })
+            
+                if (
+                    x > 0 &&
+                    arr[x - 1][y] != undefined &&
+                    arr[x][y].boxColor == arr[x - 1][y].boxColor &&
+                    checkIfStoredAlready(positionsToRemove, [x - 1, y]) == false &&
+                    checkIfStoredAlready(adjacents, [x - 1, y]) == false
+                ) {
+                    adjacents.push([x - 1, y]);
+                }
+            
+                return adjacents;
+            }
+        }
+  
+  
+        function checkIfStoredAlready(coordArr, coordToCheck) {
+            let counter = 0;
+            coordArr.forEach((coord) => {
+                if (JSON.stringify(coord) === JSON.stringify(coordToCheck)) {
+                    counter++;
+                }});
 
-        console.log(this.boxArr);
+            if (counter > 0) {
+                return true;
+            } 
+            else {
+                return false;
+            }
+        }
+  
+
+        for (let i=0; i<positionsToRemove.length; i++) {
+            let temp = positionsToRemove[i];
+            let adjacents = checkAdjacent(this.boxArr, temp);
+            positionsToRemove.push.apply(positionsToRemove, adjacents);
+        }
+  
+        console.log('--------These positions have to be removed:')
+        console.log(positionsToRemove)
+
+        if (positionsToRemove.length > 2 ) {
+            let dropTime = setTimeout( () => {
+            this.clearPositions(positionsToRemove);
+            }, 320)
+        }
+    }
+
+
+    clearPositions(positionsToRemove) {
+
+        positionsToRemove.forEach(coord => {
+            this.boxArr[coord[0]][coord[1]].domElement.remove();
+        })
+
+        positionsToRemove.forEach(coord => { //we need to shiftDown all boxes, above the ones that have been removed:
+            for (let i=coord[1]+1; i<this.boxArr[coord[0]].length; i++) {
+                if (this.boxArr[coord[0]][i] == undefined) {
+                    continue;
+                }
+                else { 
+                    this.boxArr[coord[0]][i].shiftDown();
+                }
+            }
+        })
+
+        positionsToRemove.forEach(coord => {
+            this.boxArr[coord[0]].splice(coord[1], 1); 
+        })
     }
 
     createLayer() {
         for (let i=0; i<this.boxArr.length; i++) {
             this.boxArr[i].forEach(box => {
                 box.shiftUp();
-            }
-            )
+            })
             const box = new Box(i*this.width, 0);
             this.boxArr[i].unshift(box);
-                
         }
     }
 }
@@ -283,13 +229,18 @@ class Box {
     }
 
     drop(array){
+
         this.yIndex = array[this.xIndex].length;
         this.yPosition = (array[this.xIndex].length)*this.height;
         array[this.xIndex].push(this);
         this.domElement.style.bottom = this.yPosition + "px";
         this.domElement.style.transition = "bottom 300ms ease-in 0s";
-        //console.log(array);
-        //console.log(this.yIndex);
+        
+        if (this.yIndex > 19) { 
+            console.log("game over")
+            console.log(this.yIndex)
+            gameOverModal.style.display = "block";
+        }
         return array;
     }
 
@@ -304,29 +255,20 @@ class Box {
         this.yPosition+=this.height;
         this.domElement.style.bottom = this.yPosition + "px";
         this.domElement.style.transition = "none";
-
     }
+}
 
 
-    
+var gameOverModal = document.getElementById("game-over-modal");
+var startModal = document.getElementById("start-modal");
+
+var playAgainBtn = document.getElementById("play-again-btn");
+var startBtn = document.getElementById("start-btn");
+
+playAgainBtn.onclick = function() {
+    gameOverModal.style.display = "none";
+    location.reload();
 }
 
 const game = new Game();
 game.start();
-
-
-// Get the modal
-var modal = document.getElementById("game-over-modal");
-
-// Get the button that opens the modal
-var btn = document.getElementById("play-again-btn");
-
-
-// When the user clicks on the button, open the modal
-btn.onclick = function() {
-    modal.style.display = "none";
-    location.reload()
-    new Game();
-    game.start();
-}
-
