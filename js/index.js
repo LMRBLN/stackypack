@@ -38,6 +38,13 @@ class Game {
                 if (Math.max(...this.boxArr.map((e) => e.length)) < 20) {
                     this.box.drop(this.boxArr);
                     let positionsToRemove = this.getpositionsToRemove([this.box.xIndex, this.box.yIndex]); // check if there are more than 3 same-color-boxes in a row
+                    if (positionsToRemove.length > 2 ) {
+                        let dropTime = setTimeout( () => {
+                        this.clearPositions(positionsToRemove);
+                        }, 350)
+                        //this.clearPositions(positionsToRemove);
+                    }
+                    
                     this.box = new Box(this.xPositionStart, this.yPositionStart);
                 }
                 else {
@@ -129,37 +136,61 @@ class Game {
             positionsToRemove.push.apply(positionsToRemove, adjacents);
         }
   
-        console.log('--------These positions have to be removed:')
+        console.log('--------These positions have to the same color:')
         console.log(positionsToRemove)
 
-        if (positionsToRemove.length > 2 ) {
-            let dropTime = setTimeout( () => {
-            this.clearPositions(positionsToRemove);
-            }, 320)
-        }
+        return positionsToRemove;
+
+
     }
 
 
     clearPositions(positionsToRemove) {
+
+        console.log('they have to be removed!')
 
         positionsToRemove.forEach(coord => {
             this.boxArr[coord[0]][coord[1]].domElement.remove();
         })
 
         positionsToRemove.forEach(coord => { //we need to shiftDown all boxes, above the ones that have been removed:
-            for (let i=coord[1]+1; i<this.boxArr[coord[0]].length; i++) {
+            // for (let i=coord[1]+1; i<this.boxArr[coord[0]].length; i++) {
+            for (let i = this.boxArr[coord[0]].length; i>=coord[1]; i--) {
                 if (this.boxArr[coord[0]][i] == undefined) {
                     continue;
                 }
                 else { 
                     this.boxArr[coord[0]][i].shiftDown();
+                    console.log("this one is shifted down")
+                    console.log(coord[0][i])
                 }
             }
         })
 
+
+
+
+
+        // positionsToRemove.forEach(coord => {
+        //     this.boxArr[coord[0]].splice(coord[1], 1); 
+        // })
+
         positionsToRemove.forEach(coord => {
-            this.boxArr[coord[0]].splice(coord[1], 1); 
-        })
+            console.log("remooove now this:")
+            console.log(this.boxArr[coord[0]][coord[1]]);
+            this.boxArr[coord[0]][coord[1]] = 'remove';
+          });
+
+        for (let i = 0; i < this.boxArr.length; i++) {
+            console.log(i);
+            for (let j = this.boxArr[i].length-1; j >= 0; j--) {
+              if (this.boxArr[i][j] == 'remove') {
+                console.log('bla');
+                this.boxArr[i].splice(j, 1);
+              }
+            }
+          }
+    
     }
 
     createLayer() {
@@ -169,9 +200,23 @@ class Game {
             })
             const box = new Box(i*this.width, 0);
             this.boxArr[i].unshift(box);
+            
+            //const box = new Box(i*this.width, 0);
+
+            // if (box.boxColor !== this.boxArr[i][1]boxColor) {
+            //     this.boxArr[i].unshift(box);
+            // }
+            // else {
+            //     box.domElement.remove();
+            // }
+
+            
         }
+
+        console.log('After adding a boxlayer, the array is');
+        console.log(this.boxArr);
     }
-}
+}           
 
 class Box {
     constructor(xPosition, yPosition) {
@@ -241,6 +286,10 @@ class Box {
             console.log(this.yIndex)
             gameOverModal.style.display = "block";
         }
+        console.log('The box thas has been dropped is');
+        console.log(this.boxColor, this.xIndex, this.yIndex);
+        console.log('After dropping the box, the array is');
+        console.log(array);
         return array;
     }
 
